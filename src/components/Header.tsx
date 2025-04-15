@@ -1,4 +1,3 @@
-
 import { useAppointments } from "@/contexts/AppointmentContext";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -12,11 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 const Header = () => {
-  const { users, currentUser, setCurrentUser, isPremium, togglePremiumFeatures } = useAppointments();
+  const { users, currentUser, setCurrentUser } = useAppointments();
 
   const handleUserChange = (user: User | null) => {
     setCurrentUser(user);
@@ -35,15 +32,6 @@ const Header = () => {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Switch 
-            checked={isPremium} 
-            onCheckedChange={togglePremiumFeatures} 
-            id="premium-mode"
-          />
-          <Label htmlFor="premium-mode">Premium Features</Label>
-        </div>
-        
         <Button variant="outline" size="sm" className="hidden md:flex gap-1">
           <PlusSquare className="h-4 w-4 mr-1" />
           New Appointment

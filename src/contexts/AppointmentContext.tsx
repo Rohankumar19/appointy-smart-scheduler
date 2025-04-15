@@ -1,12 +1,29 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppointmentMediator } from "@/services/appointmentMediator";
 import { AppointmentStatus, Appointment, TimeSlot } from "@/types/appointment";
 import { User } from "@/types/user";
 import { EmailNotificationObserver, CalendarSyncObserver } from "@/services/appointmentObserver";
-import { BasicSchedulingStrategy, PremiumSchedulingStrategy } from "@/services/schedulingStrategies";
+import { BasicSchedulingStrategy } from "@/services/schedulingStrategies";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
+
+// Context type
+interface AppointmentContextType {
+  appointments: Appointment[];
+  users: User[];
+  selectedDate: Date;
+  setSelectedDate: (date: Date) => void;
+  createAppointment: (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateAppointmentStatus: (id: string, status: AppointmentStatus) => void;
+  cancelAppointment: (id: string) => void;
+  rescheduleAppointment: (id: string, newStartTime: Date, newEndTime: Date) => boolean;
+  getAvailableTimeSlots: (date: Date, duration: number, staffId?: string) => TimeSlot[];
+  currentUser: User | null;
+  setCurrentUser: (user: User | null) => void;
+}
+
+// Create the context
+const AppointmentContext = createContext<AppointmentContextType | undefined>(undefined);
 
 // Mock users and appointments for demonstration
 const mockUsers: User[] = [
@@ -45,26 +62,6 @@ const mockAppointments: Appointment[] = [
   },
 ];
 
-// Context type
-interface AppointmentContextType {
-  appointments: Appointment[];
-  users: User[];
-  selectedDate: Date;
-  setSelectedDate: (date: Date) => void;
-  createAppointment: (appointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateAppointmentStatus: (id: string, status: AppointmentStatus) => void;
-  cancelAppointment: (id: string) => void;
-  rescheduleAppointment: (id: string, newStartTime: Date, newEndTime: Date) => void;
-  getAvailableTimeSlots: (date: Date, duration: number, staffId?: string) => TimeSlot[];
-  currentUser: User | null;
-  setCurrentUser: (user: User | null) => void;
-  isPremium: boolean;
-  togglePremiumFeatures: () => void;
-}
-
-// Create the context
-const AppointmentContext = createContext<AppointmentContextType | undefined>(undefined);
-
 // Provider component
 export const AppointmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mediator] = useState(() => new AppointmentMediator());
@@ -72,39 +69,14 @@ export const AppointmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [users] = useState<User[]>(mockUsers);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isPremium, setIsPremium] = useState<boolean>(false);
   
   // Initialize the mediator
   useEffect(() => {
-    // Register observers
     mediator.registerObserver(new EmailNotificationObserver());
     mediator.registerObserver(new CalendarSyncObserver());
-    
-    // Load mock data
     mediator.loadAppointments(mockAppointments);
     updateAppointmentsList();
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
-  // Toggle between basic and premium features
-  const togglePremiumFeatures = () => {
-    setIsPremium(prev => !prev);
-    
-    if (!isPremium) {
-      mediator.setSchedulingStrategy(new PremiumSchedulingStrategy(appointments));
-      toast({
-        title: "Premium features activated",
-        description: "You now have access to smart scheduling features",
-      });
-    } else {
-      mediator.setSchedulingStrategy(new BasicSchedulingStrategy(appointments));
-      toast({
-        title: "Basic features activated",
-        description: "Switched back to standard scheduling features",
-      });
-    }
-  };
   
   // Update the local state from the mediator
   const updateAppointmentsList = () => {
@@ -208,19 +180,7 @@ export const AppointmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Get available time slots
   const getAvailableTimeSlots = (date: Date, duration: number, staffId?: string): TimeSlot[] => {
     const staff = staffId ? users.find(u => u.id === staffId && u.role === "staff") : undefined;
-    
-    if (isPremium) {
-      // Use premium scheduling strategy
-      mediator.setSchedulingStrategy(new PremiumSchedulingStrategy(appointments));
-    } else {
-      // Use basic scheduling strategy
-      mediator.setSchedulingStrategy(new BasicSchedulingStrategy(appointments));
-    }
-    
-    const schedulingStrategy = isPremium 
-      ? new PremiumSchedulingStrategy(appointments)
-      : new BasicSchedulingStrategy(appointments);
-      
+    const schedulingStrategy = new BasicSchedulingStrategy(appointments);
     return schedulingStrategy.findAvailableSlots(date, duration, staff);
   };
   
@@ -236,8 +196,6 @@ export const AppointmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     getAvailableTimeSlots,
     currentUser,
     setCurrentUser,
-    isPremium,
-    togglePremiumFeatures
   };
   
   return (

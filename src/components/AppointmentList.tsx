@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppointments } from "@/contexts/AppointmentContext";
 import { Appointment, AppointmentStatus } from "@/types/appointment";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format, isSameDay } from "date-fns";
-import { Edit2, Calendar, Clock, MapPin, User, MoreVertical, Check, X, RefreshCw } from "lucide-react";
+import { Edit2, Calendar, Clock, MapPin, User, MoreVertical, Check, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,17 +17,20 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import RescheduleForm from "./RescheduleForm";
+import { useToast } from "@/hooks/use-toast";
 
 const AppointmentList = () => {
-  const { appointments, selectedDate, updateAppointmentStatus, cancelAppointment } = useAppointments();
+  const { appointments, selectedDate, updateAppointmentStatus, cancelAppointment, currentUser } = useAppointments();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const { toast } = useToast();
 
   // Filter appointments for the selected date
   const todaysAppointments = appointments.filter(
@@ -61,6 +63,23 @@ const AppointmentList = () => {
 
   const handleCancel = (id: string) => {
     cancelAppointment(id);
+  };
+
+  const canManageAppointment = (appointment: Appointment) => {
+    if (!currentUser) return false;
+    return (
+      currentUser.id === appointment.client.id || // Client who booked
+      (currentUser.role === "staff" && appointment.staff?.id === currentUser.id) // Staff assigned to appointment
+    );
+  };
+
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [selectedAppointmentForReschedule, setSelectedAppointmentForReschedule] = 
+    useState<Appointment | null>(null);
+
+  const handleReschedule = (appointment: Appointment) => {
+    setSelectedAppointmentForReschedule(appointment);
+    setIsRescheduleOpen(true);
   };
 
   return (
@@ -128,45 +147,51 @@ const AppointmentList = () => {
                   )}
                 </div>
                 <div className="flex justify-between items-center mt-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-1"
-                    onClick={() => handleViewDetails(appointment)}
-                  >
-                    <Edit2 className="h-3 w-3" />
-                    View Details
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
+                  {canManageAppointment(appointment) ? (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-1"
+                        onClick={() => handleViewDetails(appointment)}
+                      >
+                        <Edit2 className="h-3 w-3" />
+                        View Details
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {appointment.status !== "confirmed" && (
-                        <DropdownMenuItem onClick={() => handleStatusChange(appointment.id, "confirmed")}>
-                          <Check className="h-4 w-4 mr-2" />
-                          Confirm
-                        </DropdownMenuItem>
-                      )}
-                      {appointment.status !== "completed" && appointment.status !== "cancelled" && (
-                        <DropdownMenuItem onClick={() => handleStatusChange(appointment.id, "completed")}>
-                          <Check className="h-4 w-4 mr-2" />
-                          Mark as Completed
-                        </DropdownMenuItem>
-                      )}
-                      {appointment.status !== "cancelled" && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleCancel(appointment.id)} className="text-destructive">
-                            <X className="h-4 w-4 mr-2" />
-                            Cancel Appointment
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {appointment.status !== "confirmed" && (
+                            <DropdownMenuItem onClick={() => handleStatusChange(appointment.id, "confirmed")}>
+                              <Check className="h-4 w-4 mr-2" />
+                              Confirm
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onClick={() => handleReschedule(appointment)}>
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Reschedule
                           </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                          {appointment.status !== "cancelled" && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleCancel(appointment.id)} className="text-destructive">
+                                <X className="h-4 w-4 mr-2" />
+                                Cancel Appointment
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      You don't have permission to manage this appointment
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -174,7 +199,6 @@ const AppointmentList = () => {
         </div>
       )}
       
-      {/* Appointment details dialog */}
       {selectedAppointment && (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-md">
@@ -257,13 +281,20 @@ const AppointmentList = () => {
                   Confirm
                 </Button>
               )}
-              <Button variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Reschedule
-              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      )}
+
+      {selectedAppointmentForReschedule && (
+        <RescheduleForm
+          appointment={selectedAppointmentForReschedule}
+          isOpen={isRescheduleOpen}
+          onClose={() => {
+            setIsRescheduleOpen(false);
+            setSelectedAppointmentForReschedule(null);
+          }}
+        />
       )}
     </div>
   );
