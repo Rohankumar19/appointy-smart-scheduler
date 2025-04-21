@@ -14,8 +14,6 @@ Appointy is a flexible, extensible scheduling engine built with clean architectu
   - [Composite Pattern](#composite-pattern)  
   - [Mediator Pattern](#mediator-pattern)  
 - [Getting Started](#getting-started)  
-- [Usage Examples](#usage-examples)  
-- [Testing](#testing)  
 
 ---
 
@@ -103,38 +101,6 @@ Appointy is a flexible, extensible scheduling engine built with clean architectu
    npm start
    ```  
 
----
-
-## Usage Examples
-
-```javascript
-import { Scheduler } from './scheduling';
-import { EmailNotifier } from './notifications';
-import { FactoryProducer } from './appointments/factories';
-import { DefaultAppointmentMediator } from './core/mediator';
-
-// 1. Setup mediator
-const mediator = new DefaultAppointmentMediator();
-
-// 2. Register modules with mediator
-const scheduler = new Scheduler(mediator);
-const notifier  = new EmailNotifier(mediator);
-
-mediator.register('scheduler', scheduler);
-mediator.register('notifier',  notifier);
-
-// 3. Create an appointment via factory
-const demoFactory = FactoryProducer.getFactory('demo');
-const appointment = demoFactory.create({
-  date: '2025-05-10T10:00:00',
-  participants: ['alice@example.com', 'bob@example.com']
-});
-
-// 4. Schedule it
-scheduler.schedule(appointment);
-```
-
----
 
 ## Testing
 
@@ -148,13 +114,4 @@ scheduler.schedule(appointment);
   ```
 
 ---
-
-## Contributing
-
-1. Fork the repo  
-2. Create your feature branch (`git checkout -b feature/my-pattern`)  
-3. Commit your changes (`git commit -m 'Add new scheduling rule'`)  
-4. Push to the branch (`git push origin feature/my-pattern`)  
-5. Open a Pull Request  
-
 
