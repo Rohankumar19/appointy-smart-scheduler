@@ -101,17 +101,3 @@ Appointy is a flexible, extensible scheduling engine built with clean architectu
    npm start
    ```  
 
-
-## Testing
-
-- **Unit Tests**:  
-  ```bash
-  npm run test
-  ```
-- **Coverage Report**:  
-  ```bash
-  npm run coverage
-  ```
-
----
-
