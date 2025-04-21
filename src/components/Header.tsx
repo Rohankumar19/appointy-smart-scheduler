@@ -1,3 +1,4 @@
+
 import { useAppointments } from "@/contexts/AppointmentContext";
 import { User } from "@/types/user";
 import { Button } from "@/components/ui/button";
@@ -25,11 +26,7 @@ const Header = () => {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" className="hidden md:flex gap-1">
-          <PlusSquare className="h-4 w-4 mr-1" />
-          New Appointment
-        </Button>
-        
+        {/* New Appointment button removed */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             {currentUser ? <Avatar className="cursor-pointer">
