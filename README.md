@@ -58,14 +58,7 @@ Appointy is a flexible, extensible scheduling engine built with clean architectu
 - Concrete factories (e.g., `ConsultationFactory`, `DemoFactory`) encapsulate creation logic (default durations, pricing rules, required resources).  
 - Central `AppointmentFactoryProducer` returns the correct factory based on requested type.  
 
-### Composite Pattern  
-**Where:** `appointments/composite/`  
-**Why:** Group sessions (e.g., a team workshop) and recurring bookings (e.g., weekly check‑ins) must be treated uniformly.  
-**How:**  
-- Define a common `IAppointmentComponent` interface.  
-- **Leaf** nodes represent single appointments.  
-- **Composite** nodes (`GroupAppointment`, `RecurringAppointment`) hold child components and implement add/remove/traverse.  
-- Clients invoke `schedule()`, `reschedule()`, or `cancel()` on the root and let the composite structure propagate actions.  
+
 
 ### Mediator Pattern  
 **Where:** `core/mediator/`  
