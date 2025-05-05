@@ -3,21 +3,16 @@ import { useEffect } from "react";
 import Header from "@/components/Header";
 import Dashboard from "@/components/Dashboard";
 import { useAppointments } from "@/contexts/AppointmentContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { user } = useAuth();
-
   useEffect(() => {
-    // Demo helper - toast instructions for first time users
-    if (user) {
-      toast({
-        title: "Welcome to Appointy",
-        description: "You are now authenticated and can use all features of the application.",
-      });
-    }
-  }, [user]);
+    // Demo helper - toast instructions
+    toast({
+      title: "Welcome to Appointy",
+      description: "You can now use all features of the application.",
+    });
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
