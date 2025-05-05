@@ -1,5 +1,0 @@
-
-project_id = "uxrvdymrfbrmetcdaexv"
-
-[functions.generate-report]
-verify_jwt = true

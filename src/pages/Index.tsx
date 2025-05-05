@@ -6,11 +6,13 @@ import { useAppointments } from "@/contexts/AppointmentContext";
 import { toast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const { users, setCurrentUser } = useAppointments();
+
   useEffect(() => {
-    // Demo helper - toast instructions
+    // Demo helper - toast instructions for first time users
     toast({
       title: "Welcome to Appointy",
-      description: "You can now use all features of the application.",
+      description: "Select a user from the top-right menu to get started. Try the premium features!",
     });
   }, []);
 
