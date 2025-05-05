@@ -1,7 +1,6 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,74 +12,26 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/');
-      }
-    };
-    checkUser();
-  }, [navigate]);
-
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email for the confirmation link.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error creating account",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Simply navigate to home - no actual authentication
+    toast({
+      title: "Demo mode",
+      description: "Authentication has been disabled. Redirecting to dashboard.",
+    });
+    navigate('/');
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        title: "Error signing in",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Simply navigate to home - no actual authentication
+    toast({
+      title: "Demo mode",
+      description: "Authentication has been disabled. Account creation simulated.",
+    });
+    navigate('/');
   };
 
   return (
@@ -90,7 +41,7 @@ const Auth = () => {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Appointy</CardTitle>
             <CardDescription className="text-center">
-              Sign in to your account or create a new one
+              Demo mode - Authentication disabled
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -122,8 +73,8 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In"}
+                  <Button type="submit" className="w-full">
+                    Enter Demo
                   </Button>
                 </form>
               </TabsContent>
@@ -160,8 +111,8 @@ const Auth = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating Account..." : "Create Account"}
+                  <Button type="submit" className="w-full">
+                    Enter Demo
                   </Button>
                 </form>
               </TabsContent>
@@ -169,7 +120,7 @@ const Auth = () => {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-sm text-center text-muted-foreground">
-              By continuing, you agree to our Terms of Service and Privacy Policy.
+              Demo mode - No actual authentication is performed
             </div>
           </CardFooter>
         </Card>

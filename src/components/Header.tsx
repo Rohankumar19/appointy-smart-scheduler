@@ -18,15 +18,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/AuthContext";
 import { useAppointments } from "@/contexts/AppointmentContext";
 
 const Header = () => {
-  const { user, signOut } = useAuth();
   const { currentUser } = useAppointments();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -42,7 +39,7 @@ const Header = () => {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
+    // No actual sign-out - just navigate to auth page
     navigate("/auth");
   };
 
