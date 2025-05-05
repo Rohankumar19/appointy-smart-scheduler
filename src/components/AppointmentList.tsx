@@ -25,6 +25,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import RescheduleForm from "./RescheduleForm";
 import { useToast } from "@/hooks/use-toast";
+import FileUploadButton from "./FileUploadButton";
+import { Download } from "lucide-react";
 
 const AppointmentList = () => {
   const { appointments, selectedDate, updateAppointmentStatus, cancelAppointment, currentUser } = useAppointments();
@@ -261,6 +263,10 @@ const AppointmentList = () => {
                   )}
                 </div>
               </div>
+            </div>
+            <div className="space-y-4 pt-2 border-t">
+              <h4 className="text-sm font-medium pt-2">Files & Documents</h4>
+              <FileUploadButton appointmentId={selectedAppointment.id} />
             </div>
             <DialogFooter className="flex gap-2 sm:justify-start">
               {selectedAppointment.status !== "cancelled" && (
